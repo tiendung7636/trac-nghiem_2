@@ -484,7 +484,8 @@
 
     const BLOCKED_EMAILS = [
       "anvantro1105@gmail.com",
-		"tiendung.constr@gmail.com"
+	  "ndthanhabc35@gmail.com",
+	  "tiendung.constr@gmail.com"
 	  // "abc@gmail.com",
       // "xyz@gmail.com"
     ];
@@ -555,7 +556,7 @@
     function denyAccess(email){
       localStorage.removeItem("quizGoogleAuth");
       showLoginGate();
-      showAuthMessage(`Tài khoản ${email} của bạn đã bị quản trị viên chặn vì điền không đúng Họ và tên.`, "error");
+      showAuthMessage(`Tài khoản ${email} của bạn đã bị chặn vì Họ và tên không hợp lệ.`, "error");
     }
 
     function saveSession(email, exp){
