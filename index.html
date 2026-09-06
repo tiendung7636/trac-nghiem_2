@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Trang chọn đề thi trắc nghiệm trực tuyến" />
   <title>Hệ thống làm bài trắc nghiệm</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <style>
     :root{
@@ -236,11 +237,133 @@
       .exam-grid{grid-template-columns:1fr}
       .section-head{align-items:flex-start;flex-direction:column}
     }
+
+
+    /* ===== CỔNG ĐĂNG NHẬP GOOGLE ===== */
+    .app-hidden{display:none !important}
+
+    .auth-gate{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 36%),
+        linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
+    }
+
+    .auth-card{
+      width:min(460px,100%);
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:30px 26px;
+      box-shadow:var(--shadow);
+      text-align:center;
+    }
+
+    .auth-logo{
+      width:62px;
+      height:62px;
+      display:grid;
+      place-items:center;
+      margin:0 auto 16px;
+      border-radius:18px;
+      background:#eaf1ff;
+      color:#1d4ed8;
+      font-size:30px;
+      font-weight:800;
+    }
+
+    .auth-card h1{
+      margin:0 0 10px;
+      font-size:26px;
+      line-height:1.2;
+    }
+
+    .auth-card p{
+      margin:0 auto 20px;
+      max-width:360px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:15px;
+    }
+
+    #googleSignInButton{
+      min-height:44px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .auth-message{
+      display:none;
+      margin-top:18px;
+      padding:13px 14px;
+      border-radius:13px;
+      font-size:14px;
+      line-height:1.55;
+      text-align:left;
+    }
+
+    .auth-message.show{display:block}
+    .auth-message.error{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3}
+    .auth-message.info{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+
+    .user-bar{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:10px;
+      margin:0 0 12px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .user-email{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width:70vw;
+    }
+
+    .account-button{
+      border:1px solid var(--border);
+      background:#fff;
+      color:#344054;
+      border-radius:10px;
+      padding:8px 11px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .account-button:hover{background:#f8fafc}
+
+    @media(max-width:560px){
+      .auth-card{padding:26px 18px;border-radius:20px}
+      .user-bar{justify-content:space-between}
+      .user-email{max-width:58vw}
+    }
+
   </style>
 </head>
 
 <body>
-  <main class="page">
+  <section id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <div class="auth-logo">✓</div>
+      <h1>Đăng nhập để tiếp tục</h1>
+      <p>Vui lòng đăng nhập bằng tài khoản Google trước khi chọn đề thi.</p>
+      <div id="googleSignInButton"></div>
+      <div id="authMessage" class="auth-message"></div>
+    </div>
+  </section>
+
+  <main id="appPage" class="page app-hidden">
+    <div class="user-bar">
+      <span id="signedInEmail" class="user-email"></span>
+      <button id="changeAccountBtn" class="account-button" type="button">Đổi tài khoản</button>
+    </div>
     <section class="hero">
       <h1 id="examTitle">HỆ THỐNG LÀM BÀI TRẮC NGHIỆM</h1>
       <p id="examDescription">
@@ -288,7 +411,7 @@
     </section>
 
     <div class="footer">
-      Trang chọn đề thi • TIENDUNGE664 • GitHub Pages
+      Trang chọn đề thi • dunge664 • GitHub Pages
     </div>
   </main>
 
@@ -306,8 +429,30 @@
         "https://script.google.com/macros/s/AKfycbxxxxxxxx/exec";
     */
 
+    /*
+      ============================================================
+      CẤU HÌNH ĐĂNG NHẬP GOOGLE + BLACKLIST
+      ============================================================
+
+      1) Tạo OAuth 2.0 Client ID loại "Web application" trong Google Cloud.
+      2) Authorized JavaScript origins thêm:
+         https://tiendung7636.github.io
+      3) Dán Client ID vào GOOGLE_CLIENT_ID bên dưới.
+      4) Thêm email cần chặn vào BLOCKED_EMAILS.
+
+      LƯU Ý: Đây là cổng chặn ở trang GitHub. Nếu ai đó có link trực tiếp
+      của Google Form thì họ vẫn có thể bỏ qua trang này.
+    */
+    const GOOGLE_CLIENT_ID = "745231844295-ihbvipc3iek4vk5in6q9gjg7d17vtji1.apps.googleusercontent.com";
+
+    const BLOCKED_EMAILS = [
+      "anvantro1105@gmail.com"
+	  // "abc@gmail.com",
+      // "xyz@gmail.com"
+    ];
+
     const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzOKdooC7f0TQkubwgU0ubjje64LvBxTMGngAUVcpqk6vnHkz_oS_4_vFwuIEKqFrP1/exec";
-    const SITE_KEY = "site2";
+    const SITE_KEY = "site1";
 
     const FALLBACK = {
       title: "HỆ THỐNG LÀM BÀI TRẮC NGHIỆM",
@@ -317,6 +462,170 @@
       updatedAt: "",
       exams: []
     };
+
+    function normalizeEmail(value){
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function isBlockedEmail(email){
+      const target = normalizeEmail(email);
+      return BLOCKED_EMAILS.some(x => normalizeEmail(x) === target);
+    }
+
+    function decodeJwtPayload(token){
+      const parts = String(token || "").split(".");
+      if(parts.length !== 3) throw new Error("Credential không hợp lệ.");
+
+      let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      while(base64.length % 4) base64 += "=";
+
+      const binary = atob(base64);
+      const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
+      const json = new TextDecoder("utf-8").decode(bytes);
+      return JSON.parse(json);
+    }
+
+    function showAuthMessage(message, type = "info"){
+      const box = document.getElementById("authMessage");
+      box.textContent = message;
+      box.className = `auth-message show ${type}`;
+    }
+
+    function clearAuthMessage(){
+      const box = document.getElementById("authMessage");
+      box.textContent = "";
+      box.className = "auth-message";
+    }
+
+    function showLoginGate(){
+      document.getElementById("authGate").style.display = "grid";
+      document.getElementById("appPage").classList.add("app-hidden");
+      document.getElementById("signedInEmail").textContent = "";
+    }
+
+    function grantAccess(email){
+      clearAuthMessage();
+      document.getElementById("authGate").style.display = "none";
+      document.getElementById("appPage").classList.remove("app-hidden");
+      document.getElementById("signedInEmail").textContent = `Đã đăng nhập: ${email}`;
+
+      // Chỉ tải danh sách đề SAU KHI email đã qua kiểm tra.
+      renderPage(FALLBACK);
+      loadExamData();
+    }
+
+    function denyAccess(email){
+      sessionStorage.removeItem("quizGoogleAuth");
+      showLoginGate();
+      showAuthMessage(`Tài khoản ${email} đã bị quản trị viên chặn vì điền sai họ và tên.`, "error");
+    }
+
+    function saveSession(email, exp){
+      sessionStorage.setItem("quizGoogleAuth", JSON.stringify({
+        email,
+        exp: Number(exp) || Math.floor(Date.now() / 1000) + 3600
+      }));
+    }
+
+    function restoreSession(){
+      try{
+        const raw = sessionStorage.getItem("quizGoogleAuth");
+        if(!raw) return false;
+
+        const saved = JSON.parse(raw);
+        const email = normalizeEmail(saved.email);
+        const exp = Number(saved.exp) || 0;
+
+        if(!email || exp <= Math.floor(Date.now() / 1000)){
+          sessionStorage.removeItem("quizGoogleAuth");
+          return false;
+        }
+
+        if(isBlockedEmail(email)){
+          denyAccess(email);
+          return true;
+        }
+
+        grantAccess(email);
+        return true;
+      }catch(err){
+        sessionStorage.removeItem("quizGoogleAuth");
+        return false;
+      }
+    }
+
+    window.handleGoogleCredential = function(response){
+      try{
+        if(!response || !response.credential){
+          throw new Error("Google không trả về thông tin đăng nhập.");
+        }
+
+        const payload = decodeJwtPayload(response.credential);
+        const email = normalizeEmail(payload.email);
+        const now = Math.floor(Date.now() / 1000);
+
+        if(!email) throw new Error("Không đọc được địa chỉ email Google.");
+        if(payload.email_verified === false) throw new Error("Email Google chưa được xác minh.");
+        if(payload.aud !== GOOGLE_CLIENT_ID) throw new Error("Client ID không khớp.");
+        if(Number(payload.exp) && Number(payload.exp) <= now) throw new Error("Phiên đăng nhập đã hết hạn.");
+
+        if(isBlockedEmail(email)){
+          denyAccess(email);
+          return;
+        }
+
+        saveSession(email, payload.exp);
+        grantAccess(email);
+      }catch(err){
+        showLoginGate();
+        showAuthMessage("Không thể xác minh tài khoản Google. " + (err?.message || "Vui lòng thử lại."), "error");
+      }
+    };
+
+    function initGoogleLogin(retry = 0){
+      if(!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("DAN_GOOGLE_CLIENT_ID")){
+        showAuthMessage("Chưa cấu hình GOOGLE_CLIENT_ID. Hãy tạo OAuth Client ID rồi dán vào file index.html.", "error");
+        return;
+      }
+
+      if(!window.google?.accounts?.id){
+        if(retry < 40){
+          setTimeout(() => initGoogleLogin(retry + 1), 150);
+        }else{
+          showAuthMessage("Không tải được dịch vụ đăng nhập Google. Hãy kiểm tra mạng rồi tải lại trang.", "error");
+        }
+        return;
+      }
+
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: window.handleGoogleCredential,
+        auto_select: false,
+        cancel_on_tap_outside: false
+      });
+
+      const holder = document.getElementById("googleSignInButton");
+      holder.innerHTML = "";
+      google.accounts.id.renderButton(holder, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        text: "signin_with",
+        shape: "rectangular",
+        width: 300
+      });
+    }
+
+    function changeAccount(){
+      sessionStorage.removeItem("quizGoogleAuth");
+      showLoginGate();
+      clearAuthMessage();
+
+      if(window.google?.accounts?.id){
+        google.accounts.id.disableAutoSelect();
+      }
+      initGoogleLogin();
+    }
 
     function escapeHtml(value){
       return String(value ?? "")
@@ -429,8 +738,12 @@
       document.body.appendChild(script);
     }
 
-    renderPage(FALLBACK);
-    loadExamData();
+    document.getElementById("changeAccountBtn").addEventListener("click", changeAccount);
+
+    showLoginGate();
+    if(!restoreSession()){
+      initGoogleLogin();
+    }
   </script>
 </body>
 </html>
