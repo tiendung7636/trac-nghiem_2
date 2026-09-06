@@ -243,25 +243,33 @@
     .app-hidden{display:none !important}
 
     .auth-gate{
-      min-height:100dvh;
-      display:grid;
-      place-items:center;
-      padding:24px;
-      background:
-        radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 36%),
-        linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
-    }
+  min-height:100dvh;
+  width:100%;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  box-sizing:border-box;
 
-    .auth-card{
-      width:min(460px,100%);
-      background:#fff;
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:30px 26px;
-      box-shadow:var(--shadow);
-      text-align:center;
-	  transform:translateY(-45px);
-    }
+  background:
+    radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 36%),
+    linear-gradient(180deg,#f8fbff 0%,var(--bg) 100%);
+}
+
+.auth-card{
+  width:100%;
+  max-width:460px;
+
+  box-sizing:border-box;
+
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:30px 26px;
+  box-shadow:var(--shadow);
+  text-align:center;
+
+  transform:translateY(-45px);
+}
 
     .auth-logo{
       width:62px;
