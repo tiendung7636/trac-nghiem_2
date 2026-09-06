@@ -556,7 +556,7 @@
     function denyAccess(email){
       localStorage.removeItem("quizGoogleAuth");
       showLoginGate();
-      showAuthMessage(`Tài khoản ${email} của bạn đã bị chặn vì Họ và tên không hợp lệ.`, "error");
+      showAuthMessage(`Tài khoản ${email} của bạn đã bị chặn do hệ thống phát hiện họ và tên người thi không đúng.`, "error");
     }
 
     function saveSession(email, exp){
