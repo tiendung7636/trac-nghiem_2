@@ -365,18 +365,6 @@
 	  color:#667085;
 	  font-size:14px;
 	}
-
-	.open-browser-btn{
-	  width:100%;
-	  min-height:48px;
-	  border:0;
-	  border-radius:12px;
-	  background:#2563eb;
-	  color:#fff;
-	  font-size:15px;
-	  font-weight:700;
-	  cursor:pointer;
-	}
     .account-button:hover{background:#f8fafc}
 
     @media(max-width:560px){
@@ -624,75 +612,52 @@
     };
 
 function isZaloBrowser() {
-		  return /Zalo/i.test(navigator.userAgent || "");
-		}
+      const ua = navigator.userAgent || "";
 
-		function isAndroid() {
-		  return /Android/i.test(navigator.userAgent || "");
-		}
+      // Zalo có thể tự ghi tên vào User-Agent.
+      const zalo = /Zalo/i.test(ua);
 
-		function isIOS() {
-		  return /iPhone|iPad|iPod/i.test(navigator.userAgent || "");
-		}
+      // Android WebView thường có "wv" hoặc Version/4.0.
+      const androidWebView =
+        /Android/i.test(ua) &&
+        (/\bwv\b/i.test(ua) || /Version\/4\.0/i.test(ua));
 
-		function openExternalBrowser() {
-		  const currentUrl = window.location.href;
+      // WebView trên iPhone/iPad thường có AppleWebKit nhưng không có Safari.
+      const iosWebView =
+        /iPhone|iPad|iPod/i.test(ua) &&
+        /AppleWebKit/i.test(ua) &&
+        !/Safari/i.test(ua);
 
-		  if (isAndroid()) {
-			const cleanUrl = currentUrl.replace(/^https?:\/\//, "");
+      return zalo || androidWebView || iosWebView;
+    }
 
-			window.location.href =
-			  "intent://" + cleanUrl +
-			  "#Intent;scheme=https;action=android.intent.action.VIEW;end";
-		  }
-		}
-		function handleZaloBrowser() {
-		  if (!isZaloBrowser()) {
-			return false;
-		  }
+    function handleZaloBrowser() {
+      if (!isZaloBrowser()) {
+        return false;
+      }
 
-		  const holder = document.getElementById("googleSignInButton");
+      const holder = document.getElementById("googleSignInButton");
+      if (!holder) return true;
 
-		  // Android: thử tự mở trình duyệt ngoài
-		  if (isAndroid()) {
-			openExternalBrowser();
+      // Không khởi tạo Google Login trong Zalo/WebView.
+      // Chỉ hướng dẫn người dùng mở lại bằng trình duyệt ngoài.
+      holder.innerHTML = `
+        <div class="browser-warning">
+          <b>Vui lòng mở bằng trình duyệt bên ngoài</b>
+          <p>
+            Trang này không hỗ trợ đăng nhập Google trực tiếp trong trình duyệt của Zalo.
+          </p>
+          <p>
+            Hãy nhấn <strong>⋯</strong> hoặc biểu tượng menu của Zalo,
+            sau đó chọn <strong>Mở bằng trình duyệt</strong> để tiếp tục.
+          </p>
+        </div>
+      `;
 
-			// Nếu Zalo không cho tự mở thì sau 1 giây hiện nút dự phòng
-			setTimeout(() => {
-			  holder.innerHTML = `
-				<div class="browser-warning">
-				  <b>Vui lòng mở bằng trình duyệt</b>
-				  <p>Không hỗ trợ đăng nhập Google trực tiếp trong Zalo.</p>
+      return true;
+    }
 
-				  <button
-					type="button"
-					class="open-browser-btn"
-					onclick="openExternalBrowser()"
-				  >
-					🌐 Mở bằng trình duyệt
-				  </button>
-				</div>
-			  `;
-			}, 1000);
-		  }
-
-		  // iPhone/iPad
-		  else if (isIOS()) {
-			holder.innerHTML = `
-			  <div class="browser-warning">
-				<b>Không thể đăng nhập trực tiếp trong Zalo</b>
-				<p>
-				  Nhấn <strong>⋯</strong> trên Zalo và chọn
-				  <strong>Mở bằng trình duyệt</strong> để tiếp tục.
-				</p>
-			  </div>
-			`;
-		  }
-
-		  // Không cho chạy Google Login trong Zalo
-		  return true;
-		}
-	function initGoogleLogin(retry = 0){
+    function initGoogleLogin(retry = 0){
 
 	  if (handleZaloBrowser()) {
 		return;
