@@ -245,10 +245,12 @@
     .auth-gate{
   min-height:100dvh;
   width:100%;
-  display:grid;
-  place-items:center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
   padding:24px;
   box-sizing:border-box;
+  overflow-x:hidden;
 
   background:
     radial-gradient(circle at top left, rgba(37,99,235,.12), transparent 36%),
@@ -258,9 +260,8 @@
 .auth-card{
   width:100%;
   max-width:460px;
-
+  min-width:0;
   box-sizing:border-box;
-
   background:#fff;
   border:1px solid var(--border);
   border-radius:24px;
@@ -298,12 +299,14 @@
       font-size:15px;
     }
 
-    #googleSignInButton{
-      min-height:44px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+	#googleSignInButton{
+	  width:100%;
+ 	  min-width:0;
+ 	  min-height:44px;
+ 	  display:flex;
+ 	  justify-content:center;
+ 	  align-items:center;
+	}
 
     .auth-message{
       display:none;
@@ -614,16 +617,22 @@
         cancel_on_tap_outside: false
       });
 
-      const holder = document.getElementById("googleSignInButton");
-      holder.innerHTML = "";
-      google.accounts.id.renderButton(holder, {
-        type: "standard",
-        theme: "outline",
-        size: "large",
-        text: "signin_with",
-        shape: "rectangular",
-        width: 300
-      });
+	const holder = document.getElementById("googleSignInButton");
+	holder.innerHTML = "";
+	
+	const buttonWidth = Math.min(
+	  300,
+	  Math.floor(holder.getBoundingClientRect().width)
+	);
+	
+	google.accounts.id.renderButton(holder, {
+	  type: "standard",
+	  theme: "outline",
+	  size: "large",
+	  text: "signin_with",
+	  shape: "rectangular",
+	  width: buttonWidth
+	});
     }
 
     function changeAccount(){
