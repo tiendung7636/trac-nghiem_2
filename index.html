@@ -348,7 +348,35 @@
       font-weight:700;
       cursor:pointer;
     }
+	.browser-warning{
+	  width:100%;
+	  text-align:center;
+	  line-height:1.5;
+	}
 
+	.browser-warning b{
+	  display:block;
+	  font-size:18px;
+	  margin-bottom:8px;
+	}
+
+	.browser-warning p{
+	  margin:0 0 16px;
+	  color:#667085;
+	  font-size:14px;
+	}
+
+	.open-browser-btn{
+	  width:100%;
+	  min-height:48px;
+	  border:0;
+	  border-radius:12px;
+	  background:#2563eb;
+	  color:#fff;
+	  font-size:15px;
+	  font-weight:700;
+	  cursor:pointer;
+	}
     .account-button:hover{background:#f8fafc}
 
     @media(max-width:560px){
@@ -511,7 +539,7 @@
     }
 
     function showLoginGate(){
-      document.getElementById("authGate").style.display = "grid";
+      document.getElementById("authGate").style.display = "flex";
       document.getElementById("appPage").classList.add("app-hidden");
       document.getElementById("signedInEmail").textContent = "";
     }
@@ -595,20 +623,95 @@
       }
     };
 
-    function initGoogleLogin(retry = 0){
-      if(!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("DAN_GOOGLE_CLIENT_ID")){
-        showAuthMessage("Chưa cấu hình GOOGLE_CLIENT_ID. Hãy tạo OAuth Client ID rồi dán vào file index.html.", "error");
-        return;
-      }
+function isZaloBrowser() {
+		  return /Zalo/i.test(navigator.userAgent || "");
+		}
 
-      if(!window.google?.accounts?.id){
-        if(retry < 40){
-          setTimeout(() => initGoogleLogin(retry + 1), 150);
-        }else{
-          showAuthMessage("Không tải được dịch vụ đăng nhập Google. Hãy kiểm tra mạng rồi tải lại trang.", "error");
-        }
-        return;
-      }
+		function isAndroid() {
+		  return /Android/i.test(navigator.userAgent || "");
+		}
+
+		function isIOS() {
+		  return /iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+		}
+
+		function openExternalBrowser() {
+		  const currentUrl = window.location.href;
+
+		  if (isAndroid()) {
+			const cleanUrl = currentUrl.replace(/^https?:\/\//, "");
+
+			window.location.href =
+			  "intent://" + cleanUrl +
+			  "#Intent;scheme=https;action=android.intent.action.VIEW;end";
+		  }
+		}
+		function handleZaloBrowser() {
+		  if (!isZaloBrowser()) {
+			return false;
+		  }
+
+		  const holder = document.getElementById("googleSignInButton");
+
+		  // Android: thử tự mở trình duyệt ngoài
+		  if (isAndroid()) {
+			openExternalBrowser();
+
+			// Nếu Zalo không cho tự mở thì sau 1 giây hiện nút dự phòng
+			setTimeout(() => {
+			  holder.innerHTML = `
+				<div class="browser-warning">
+				  <b>Vui lòng mở bằng trình duyệt</b>
+				  <p>Không hỗ trợ đăng nhập Google trực tiếp trong Zalo.</p>
+
+				  <button
+					type="button"
+					class="open-browser-btn"
+					onclick="openExternalBrowser()"
+				  >
+					🌐 Mở bằng trình duyệt
+				  </button>
+				</div>
+			  `;
+			}, 1000);
+		  }
+
+		  // iPhone/iPad
+		  else if (isIOS()) {
+			holder.innerHTML = `
+			  <div class="browser-warning">
+				<b>Không thể đăng nhập trực tiếp trong Zalo</b>
+				<p>
+				  Nhấn <strong>⋯</strong> trên Zalo và chọn
+				  <strong>Mở bằng trình duyệt</strong> để tiếp tục.
+				</p>
+			  </div>
+			`;
+		  }
+
+		  // Không cho chạy Google Login trong Zalo
+		  return true;
+		}
+	function initGoogleLogin(retry = 0){
+
+	  if (handleZaloBrowser()) {
+		return;
+	  }
+
+	  if(!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.includes("DAN_GOOGLE_CLIENT_ID")){
+		showAuthMessage("Chưa cấu hình GOOGLE_CLIENT_ID. Hãy tạo OAuth Client ID rồi dán vào file index.html.", "error");
+		return;
+	  }
+
+	  if(!window.google?.accounts?.id){
+		if(retry < 40){
+		  setTimeout(() => initGoogleLogin(retry + 1), 150);
+		}else{
+		  showAuthMessage("Không tải được dịch vụ đăng nhập Google. Hãy kiểm tra mạng rồi tải lại trang.", "error");
+		}
+		return;
+	  }
+	  
 
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
