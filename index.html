@@ -351,7 +351,7 @@
 <body>
   <section id="authGate" class="auth-gate">
     <div class="auth-card">
-      <div class="auth-logo">✓</div>
+      <div class="auth-logo">👤</div>
       <h1>Đăng nhập để tiếp tục</h1>
       <p>Vui lòng đăng nhập bằng tài khoản Google trước khi chọn đề thi.</p>
       <div id="googleSignInButton"></div>
@@ -518,7 +518,7 @@
     function denyAccess(email){
       sessionStorage.removeItem("quizGoogleAuth");
       showLoginGate();
-      showAuthMessage(`Tài khoản ${email} đã bị quản trị viên chặn vì điền sai họ và tên.`, "error");
+      showAuthMessage(`Tài khoản ${email} của bạn đã bị quản trị viên chặn vì điền không đúng Họ và tên.`, "error");
     }
 
     function saveSession(email, exp){
