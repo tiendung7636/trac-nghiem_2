@@ -553,13 +553,13 @@
     }
 
     function denyAccess(email){
-      sessionStorage.removeItem("quizGoogleAuth");
+      localStorage.removeItem("quizGoogleAuth");
       showLoginGate();
       showAuthMessage(`Tài khoản ${email} của bạn đã bị quản trị viên chặn vì điền không đúng Họ và tên.`, "error");
     }
 
     function saveSession(email, exp){
-      sessionStorage.setItem("quizGoogleAuth", JSON.stringify({
+      localStorage.setItem("quizGoogleAuth", JSON.stringify({
         email,
         exp: Number(exp) || Math.floor(Date.now() / 1000) + 3600
       }));
@@ -567,7 +567,7 @@
 
     function restoreSession(){
       try{
-        const raw = sessionStorage.getItem("quizGoogleAuth");
+        const raw = localStorage.getItem("quizGoogleAuth");
         if(!raw) return false;
 
         const saved = JSON.parse(raw);
@@ -575,7 +575,7 @@
         const exp = Number(saved.exp) || 0;
 
         if(!email || exp <= Math.floor(Date.now() / 1000)){
-          sessionStorage.removeItem("quizGoogleAuth");
+          localStorage.removeItem("quizGoogleAuth");
           return false;
         }
 
@@ -587,7 +587,7 @@
         grantAccess(email);
         return true;
       }catch(err){
-        sessionStorage.removeItem("quizGoogleAuth");
+        localStorage.removeItem("quizGoogleAuth");
         return false;
       }
     }
@@ -710,7 +710,7 @@ function isZaloBrowser() {
     }
 
     function changeAccount(){
-      sessionStorage.removeItem("quizGoogleAuth");
+      localStorage.removeItem("quizGoogleAuth");
       showLoginGate();
       clearAuthMessage();
 
