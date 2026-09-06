@@ -272,18 +272,22 @@
   transform:translateY(-45px);
 }
 
-    .auth-logo{
-      width:62px;
-      height:62px;
-      display:grid;
-      place-items:center;
-      margin:0 auto 16px;
-      border-radius:18px;
-      background:#eaf1ff;
-      color:#1d4ed8;
-      font-size:30px;
-      font-weight:800;
-    }
+	.auth-logo{
+	  width:62px;
+	  height:62px;
+	  display:grid;
+	  place-items:center;
+	  margin:0 auto 16px;
+	  border-radius:18px;
+	  background:#fff;
+	  border:1px solid #e5e7eb;
+	}
+
+	.auth-logo img{
+	  width:34px;
+	  height:34px;
+	  display:block;
+	}
 
     .auth-card h1{
       margin:0 0 10px;
@@ -379,7 +383,12 @@
 <body>
   <section id="authGate" class="auth-gate">
     <div class="auth-card">
-      <div class="auth-logo">👤</div>
+      <div class="auth-logo">
+		  <img
+			src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+			alt="Google"
+		  >
+	  </div>
       <h1>Đăng nhập để tiếp tục</h1>
       <p>Vui lòng đăng nhập bằng tài khoản Google trước khi chọn đề thi.</p>
       <div id="googleSignInButton"></div>
@@ -644,9 +653,6 @@ function isZaloBrowser() {
       holder.innerHTML = `
         <div class="browser-warning">
           <b>Vui lòng mở bằng trình duyệt bên ngoài</b>
-          <p>
-            Trang này không hỗ trợ đăng nhập Google trực tiếp trong trình duyệt của Zalo.
-          </p>
           <p>
             Hãy nhấn <strong>⋯</strong> hoặc biểu tượng menu của Zalo,
             sau đó chọn <strong>Mở bằng trình duyệt</strong> để tiếp tục.
